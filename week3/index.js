@@ -79,7 +79,6 @@ function App() {
         const errorMessage = error.response?.data?.message || '驗證失敗';
         setError(`登入驗證失敗: ${errorMessage}`);
         setisAuthLogin(false);
-        Cookies.remove('hexToken');
       } finally {
         setIsLoading(false);
       }
