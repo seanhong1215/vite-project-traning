@@ -6,8 +6,8 @@ function App() {
 
   // 表單輸入的帳號密碼資料
   const [formData, setFormData] = React.useState({
-    username: "",
-    password: "",
+    username: "bennyhong@gmail.com",
+    password: "bennyhong",
   });
 
   const [isAuthLogin, setisAuthLogin] = React.useState(false);
