@@ -1,32 +1,32 @@
+import { useState, useEffect, useRef } from 'react'
+import * as bootstrap from 'bootstrap';
+import Swal from 'sweetalert2';
+import axios from 'axios';
 
 function App() {
-
-  const API_BASE = "https://ec-course-api.hexschool.io/v2";
-  const API_PATH = "benny";
-
-  // 設定錯誤訊息
-  const [error, setError] = React.useState(null);
+  const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+  const API_PATH = import.meta.env.VITE_API_PATH;
 
   // api載入 loading..
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 表單輸入的帳號密碼資料
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     username: "bennyhong@gmail.com",
     password: "bennyhong",
   });
 
   // check 登入
-  const [isAuthLogin, setisAuthLogin] = React.useState(false);
+  const [isAuthLogin, setisAuthLogin] = useState(false);
 
   // 設定初始產品資料
-  const [products, setProducts] = React.useState([]);
+  const [products, setProducts] = useState([]);
 
   // modal 相關
-  const modalElementRef = React.useRef(null);
-  
-  const [modalType, setModalType] = React.useState("");
-  const [templateData, setTemplateData] = React.useState({
+  const modalElementRef = useRef(null);
+
+  const [modalType, setModalType] = useState("");
+  const [templateData, setTemplateData] = useState({
     id: "",
     imageUrl: "",
     title: "",
@@ -40,7 +40,7 @@ function App() {
     imagesUrl: [],
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const token = document.cookie.replace(
       /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -49,35 +49,35 @@ function App() {
     // 建立 axios 實例
     axios.defaults.headers.common.Authorization = token;
 
-    // 初始化 Modal
-    modalElementRef.current = new bootstrap.Modal("#productModal", {
-      keyboard: false,
-    });
-
     document.querySelector('#productModal').addEventListener('hide.bs.modal', () => {
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
     });
 
-    checkAdmin();
+    if (!token) {
+      return
+    } else {
+      checkAdmin();
+    }
 
   }, []);
-
-  // templateData 改變時，執行 useEffect 內的程式碼(只執行一次)
-  React.useEffect(() => {}, [templateData]);
 
   // 處理檢查登入的按鈕邏輯
   const checkAdmin = async() =>{
       setIsLoading(true);
-      setError(null);
       try {
-        await axios.post(`${API_BASE}/api/user/check`);
+        await axios.post(`${API_BASE_URL}/api/user/check`);
         setisAuthLogin(true);
         getProductData();
       } catch (error) {
-        const errorMessage = error.response?.data?.message || '驗證失敗';
-        setError(`登入驗證失敗: ${errorMessage}`);
+          if(error.response?.data?.success === false){
+            Swal.fire({
+              title: "驗證失敗，請重新登入",
+              icon: "error"
+            })
+            setisAuthLogin(false);
+          }
         setisAuthLogin(false);
       } finally {
         setIsLoading(false);
@@ -87,10 +87,11 @@ function App() {
   // 打開 Modal
   const openModal = (product, type) => {
     if (!modalElementRef.current) return;
-    // 確保 modalElementRef.current 是 Bootstrap Modal 實例
-    if (!modalElementRef.current || !(modalElementRef.current instanceof bootstrap.Modal)) {
-      modalElementRef.current = new bootstrap.Modal(modalElementRef.current);
-    }
+    
+    // 初始化 Modal
+    modalElementRef.current = new bootstrap.Modal("#productModal", {
+      keyboard: false,
+    });
 
     setTemplateData({
       id: product.id || "",
@@ -162,14 +163,18 @@ function App() {
     });
   };
 
-   // 取得產品資料
+  // 取得產品資料
   const getProductData = async () => {
-    setError(null);
     try {
-      const response = await axios.get(`${API_BASE}/api/${API_PATH}/admin/products`);
+      const response = await axios.get(`${API_BASE_URL}/api/${API_PATH}/admin/products`);
       setProducts(response.data.products);
     } catch (error) {
-      setError('取得產品失敗:', error.response.data.message);
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "取得產品失敗",
+            icon: "error"
+          })
+        }
     }
   };
 
@@ -182,7 +187,7 @@ function App() {
       product = `product`;
     }
 
-    const url = `${API_BASE}/api/${API_PATH}/admin/${product}`;
+    const url = `${API_BASE_URL}/api/${API_PATH}/admin/${product}`;
 
     const productData = {
       data: {
@@ -198,19 +203,39 @@ function App() {
       let response;
       if (modalType === "edit") {
         response = await axios.put(url, productData);
-        console.log("更新成功", response.data);
+        if(response?.data?.success === true){
+          Swal.fire({
+            title: "更新成功",
+            icon: "success"
+          })
+        }
       } else {
         response = await axios.post(url, productData);
-        console.log("新增成功", response.data);
+        if(response?.data?.success === true){
+          Swal.fire({
+            title: "新增成功",
+            icon: "success"
+          })
+        }
       }
 
       modalElementRef.current.hide();
       getProductData();
-    } catch (err) {
+    } catch (error) {
       if (modalType === "edit") {
-        console.error("更新失敗", err.response.data.message);
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "更新失敗",
+            icon: "error"
+          })
+        }
       } else {
-        console.error("新增失敗", err.response.data.message);
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "新增失敗",
+            icon: "error"
+          })
+        }
       }
     }
   };
@@ -219,13 +244,23 @@ function App() {
   const delProductData = async (id) => {
     try {
       const response = await axios.delete(
-        `${API_BASE}/api/${API_PATH}/admin/product/${id}`
+        `${API_BASE_URL}/api/${API_PATH}/admin/product/${id}`
       );
-      console.log("刪除成功", response.data);
+      if(response?.data?.success === true){
+        Swal.fire({
+          title: "刪除成功",
+          icon: "success"
+        })
+      }
       modalElementRef.current.hide();
       getProductData();
-    } catch (err) {
-      console.error("刪除失敗", err.response.data.message);
+    } catch (error) {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "刪除失敗",
+            icon: "error"
+          })
+        }
     }
   };
 
@@ -241,21 +276,32 @@ function App() {
   // 登入按鈕邏輯
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
     try {
-      const response = await axios.post(`${API_BASE}/admin/signin`, formData);
+      const response = await axios.post(`${API_BASE_URL}/admin/signin`, formData);
       const { token, expired } = response.data;
       document.cookie = `hexToken=${token};expires=${new Date(expired)};`;
       axios.defaults.headers.common.Authorization = `${token}`;
       getProductData();
       setisAuthLogin(true);
     } catch (error) {
-      setError('登入失敗:', error.response.data.message);
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "登入失敗",
+            icon: "error"
+          })
+        }
     }
   };
 
   if (isLoading) {
-    return <div className="text-center">Loading...</div>;
+    return (
+      <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 p-4">
+        {/* Bootstrap Spinner */}
+        <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -619,6 +665,4 @@ function App() {
   );
 }
 
-const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(<App />);
+export default App
