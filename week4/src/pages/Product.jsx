@@ -44,12 +44,11 @@ function ProductPage() {
 
   useEffect(() => {
     const init = async () => {
-      const isLoggedIn = await admin.checkAdmin();
+      const isLoggedIn = await admin.checkLogin();
       setisAuthLogin(isLoggedIn);
+      getProductData();
     };
     init();
-
-    getProductData();
 
     // 初始化 Modal
     productModalRef.current = new bootstrap.Modal('#productModal', {
@@ -89,7 +88,7 @@ function ProductPage() {
 
     await api
       .createProductData(productData)
-      .then(() => {
+      .then((response) => {
         closeModal();
         getProductData();
         if(response?.data?.success === true){
@@ -123,7 +122,7 @@ function ProductPage() {
 
     await api
       .updateProductData(productData)
-      .then(() => {
+      .then((response) => {
         closeModal();
         getProductData();
         if(response?.data?.success === true){
@@ -147,7 +146,7 @@ function ProductPage() {
   const delProductData = async (product) => {
     await api
       .delProductData(product.id)
-      .then(() => {
+      .then((response) => {
         closeModal();
         getProductData();
         if(response?.data?.success === true){

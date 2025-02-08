@@ -7,7 +7,8 @@ export const admin = {
     try {
       const response = await api.signIn(formData);
       const { token, expired } = response.data;
-      document.cookie = `accessToken=${token}; expires=${new Date(expired)}`;
+      document.cookie = `hexToken=${token}; expires=${new Date(expired)}`;
+      axios.defaults.headers.common.Authorization = `${token}`;
     } catch (error) {
       if(error.response?.data?.success === false){
         Swal.fire({
@@ -17,15 +18,20 @@ export const admin = {
       }
     }
   },
-  checkAdmin: async () => {
+  checkLogin: async () => {
     try {
       const token = document.cookie.replace(
         /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
         "$1"
       );
       axios.defaults.headers.common.Authorization = token;
-      const response = await api.checkAdmin();
-      return response.data.success;
+      if (!token) {
+        return
+      } else {
+        const response = await api.checkAdmin();
+        return response.data.success;
+      }
+      
     } catch (error) {
         if(error.response?.data?.success === false){
           Swal.fire({

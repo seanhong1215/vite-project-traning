@@ -12,7 +12,7 @@ const LoginPage = () => {
   useEffect(() => {
     setIsLoading(true);
     const init = async () => {
-      const isLoggedIn = await admin.checkAdmin();
+      const isLoggedIn = await admin.checkLogin();
       setisAuthLogin(isLoggedIn);
       setIsLoading(false);
     };
