@@ -21,8 +21,8 @@ const LoginPage = () => {
 
   // 表單輸入的帳號密碼資料
   const [formData, setFormData] = useState({
-    username: "bennyhong@gmail.com",
-    password: "bennyhong",
+    username: "",
+    password: "",
   });
 
     // 取得登入的帳號密碼 value 綁定 useState 
