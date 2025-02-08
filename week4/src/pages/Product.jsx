@@ -65,8 +65,13 @@ function ProductPage() {
         setProducts(res.data.products);
         setPagination(res.data.pagination);
       })
-      .catch((err) => {
-        alert(err.response.data.message);
+      .catch((error) => {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "取得產品失敗",
+            icon: "error"
+          })
+        }
       });
   };
 
@@ -87,13 +92,20 @@ function ProductPage() {
       .then(() => {
         closeModal();
         getProductData();
-        Swal.fire({
-          title: "新增產品成功",
-          icon: "success"
-        });
+        if(response?.data?.success === true){
+          Swal.fire({
+            title: "新增產品成功",
+            icon: "success"
+          })
+        }
       })
-      .catch((err) => {
-        alert(err.response.data.message);
+      .catch((error) => {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "新增產品失敗",
+            icon: "error"
+          })
+        }
       });
   }
 
@@ -114,13 +126,20 @@ function ProductPage() {
       .then(() => {
         closeModal();
         getProductData();
-        Swal.fire({
-          title: "更新產品成功",
-          icon: "success"
-        });
+        if(response?.data?.success === true){
+          Swal.fire({
+            title: "更新產品成功",
+            icon: "success"
+          })
+        }
       })
-      .catch((err) => {
-        alert(err.response.data.message);
+      .catch((error) => {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "更新產品失敗",
+            icon: "error"
+          })
+        }
       });
   }
 
@@ -131,13 +150,20 @@ function ProductPage() {
       .then(() => {
         closeModal();
         getProductData();
-        Swal.fire({
-          title: "刪除產品成功",
-          icon: "success"
-        });
+        if(response?.data?.success === true){
+          Swal.fire({
+            title: "刪除產品成功",
+            icon: "success"
+          })
+        }
       })
-      .catch((err) => {
-        alert(err.response.data.message);
+      .catch((error) => {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "刪除產品失敗",
+            icon: "error"
+          })
+        }
       });
   }
 

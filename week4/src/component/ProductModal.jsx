@@ -40,11 +40,13 @@ function ProductModal({
           imageUrl: res.data.imageUrl,
         }));
       })
-      .catch((err) => {
-        Swal.fire({
-          title: '上傳失敗' + err.response.data.message,
-          icon: "error"
-        });
+      .catch((error) => {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "上傳圖片失敗",
+            icon: "error"
+          })
+        }
       });
   }
 

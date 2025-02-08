@@ -12,8 +12,8 @@ function App() {
 
   // 表單輸入的帳號密碼資料
   const [formData, setFormData] = useState({
-    username: "bennyhong@gmail.com",
-    password: "bennyhong",
+    username: "",
+    password: "",
   });
 
   // check 登入

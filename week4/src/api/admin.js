@@ -9,7 +9,12 @@ export const admin = {
       const { token, expired } = response.data;
       document.cookie = `accessToken=${token}; expires=${new Date(expired)}`;
     } catch (error) {
-      alert(error.response.data.message);
+      if(error.response?.data?.success === false){
+        Swal.fire({
+          title: "登入失敗",
+          icon: "error"
+        })
+      }
     }
   },
   checkAdmin: async () => {
@@ -21,11 +26,13 @@ export const admin = {
       axios.defaults.headers.common.Authorization = token;
       const response = await api.checkAdmin();
       return response.data.success;
-    } catch (err) {
-      Swal.fire({
-        title: '登入驗證失敗' + err.response?.data?.message || '驗證失敗',
-        icon: "error"
-      });
+    } catch (error) {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "驗證失敗，請重新登入",
+            icon: "error"
+          })
+        }
     }
   },
 }; 
