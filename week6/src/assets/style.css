@@ -31,3 +31,7 @@ img {
 .images {
   height: 150px;
 }
+
+form > div{
+  text-align: left;
+}
