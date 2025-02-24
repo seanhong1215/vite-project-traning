@@ -16,29 +16,25 @@ const CheckoutPage = ({getCart}) => {
   const onSubmit = async (data) => {
     const validationErrors = validateForm(data);
         if (Object.keys(validationErrors).length === 0) {
-          await api
-                .order(data)
-                .then((res) => {
-                  if(res?.data?.success === true){
-                    Swal.fire({
-                      title: "送出訂單資料成功",
-                      icon: "success"
-                    }).then((result) => {
-                      if (result.isConfirmed) {
-                        getCart();
-                        navigate("/");
-                      }
-                    });
-                  }
-                })
-                .catch((error) => {
-                  if(error.response?.data?.success === false){
-                    Swal.fire({
-                      title: "送出訂單資料失敗",
-                      icon: "error"
-                    })
-                  }
-                });
+          await api.order(data);
+          try{
+              Swal.fire({
+                title: "送出訂單資料成功",
+                icon: "success"
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  getCart();
+                  navigate("/");
+                }
+              });
+          } catch(error) {
+            if(error.response?.data?.success === false){
+              Swal.fire({
+                title: "送出訂單資料失敗",
+                icon: "error"
+              })
+            }
+          }
         }
   };
 

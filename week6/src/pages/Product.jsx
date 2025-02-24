@@ -34,40 +34,35 @@ const ProductPage = ({ getCart, cart }) => {
 
   // 取得全部產品，page = 1 帶入分頁
   const getProducts = async (page = 1) => {
-    await api
-      .getProducts(page)
-      .then((res) => {
+    const res = await api.getProducts(page);
+    try {
         setProducts(res.data.products);
         setPagination(res.data.pagination);
-      })
-      .catch((error) => {
-        if(error.response?.data?.success === false){
-          Swal.fire({
-            title: "取得產品失敗",
-            icon: "error"
-          })
-        }
-      });
+    } catch (error) {
+      if(error.response?.data?.success === false){
+        Swal.fire({
+          title: "取得產品失敗",
+          icon: "error"
+        })
+      }
+    }
   };
 
   // 取得單一產品
   const getProduct = async (id) => {
     setLoadingProductId(id);
-    await api
-      .getProduct(id)
-      .then((res) => {
+    const res = await api.getProduct(id);
+    try {
         setSelectedProduct(res.data.product);
         setLoadingProductId(null);
-        console.log(res);
-      })
-      .catch((error) => {
-        if(error.response?.data?.success === false){
-          Swal.fire({
-            title: "取得產品失敗",
-            icon: "error"
-          })
-        }
-      });
+    } catch (error) {
+      if(error.response?.data?.success === false){
+        Swal.fire({
+          title: "取得產品失敗",
+          icon: "error"
+        })
+      }
+    } 
   };
 
   // 打開 Modal
@@ -90,7 +85,6 @@ const ProductPage = ({ getCart, cart }) => {
     productModalRef.current.hide();
   }
 
-
   // 加入購物車
   const addCart = async (id, num) => {
     setLoadingCartId(id);
@@ -98,9 +92,8 @@ const ProductPage = ({ getCart, cart }) => {
       product_id: id,
       qty: num,
     };
-    await api
-    .addCart(data)
-    .then((res) => {
+    await api.addCart(data);
+      try {
         getCart();
         setLoadingCartId(null);
         productModalRef.current.hide();
@@ -108,16 +101,14 @@ const ProductPage = ({ getCart, cart }) => {
           title: "加入購物車成功",
           icon: "success"
         })
-        console.log(res);
-      })
-      .catch((error) => {
+      } catch (error) {
         if(error.response?.data?.success === false){
           Swal.fire({
             title: "加入購物車失敗",
             icon: "error"
           })
         }
-      });
+      }
   };
 
   return (
@@ -152,8 +143,8 @@ const ProductPage = ({ getCart, cart }) => {
 }
 
 ProductPage.propTypes = {
-  getCart: PropTypes.func.isRequired,   // getCart 需要是一個函數，且是必需的
-  cart: PropTypes.object.isRequired,    // cart 需要是一個物件，且是必需的
+  getCart: PropTypes.func.isRequired,   
+  cart: PropTypes.object.isRequired,    
 };
 
 export default ProductPage

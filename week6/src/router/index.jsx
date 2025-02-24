@@ -11,7 +11,7 @@ const createRouter = (deleteCartAll, deleteCart, updateCart, getCart, cart) => {
         element: <FrontendLayout />,
         children: [
           {
-            index: true, 
+            index: true, //設定首頁
             element: <ProductPage getCart={getCart} cart={cart} />,
           },
           {
@@ -35,17 +35,3 @@ const createRouter = (deleteCartAll, deleteCart, updateCart, getCart, cart) => {
   };
 
 export default createRouter ;
-
-
-{/* <Route 
-path="/vite-project-traning/week6/cart"
-element={
-  <CartPage 
-    cart={cart}
-    deleteCartAll={deleteCartAll}
-    deleteCart={deleteCart}
-    updateCart={updateCart}
-  />
-} 
-/>
-<Route path="/vite-project-traning/week6/checkout" element={<CheckoutPage getCart={getCart}/>} /> */}
