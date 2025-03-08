@@ -1,20 +1,18 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom';
-import ProductList from '../component/ProductList'
-import Pagination from '../component/Pagination'
-import ProductModal from '../component/ProductModal';
-import * as bootstrap from 'bootstrap';
+import { useState, useEffect, useRef } from 'react';
+import ProductList from '../component/ProductList';
+import Pagination from '../component/Pagination';
 import Swal from 'sweetalert2';
 import { api } from '../api/api';
 import PropTypes from 'prop-types';
+import Navbar from '../component/Navbar';
 
 const ProductPage = ({ getCart, cart }) => {
 
   // 設定初始產品資料
   const [products, setProducts] = useState([]);
-  const [loadingProductId, setLoadingProductId] = useState(null);
+
   const [loadingCartId, setLoadingCartId] = useState(null);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [loadingProductId, setLoadingProductId] = useState(null);
 
   // 設定分頁資料
   const [pagination, setPagination] = useState({
@@ -48,43 +46,6 @@ const ProductPage = ({ getCart, cart }) => {
     }
   };
 
-  // 取得單一產品
-  const getProduct = async (id) => {
-    setLoadingProductId(id);
-    const res = await api.getProduct(id);
-    try {
-        setSelectedProduct(res.data.product);
-        setLoadingProductId(null);
-    } catch (error) {
-      if(error.response?.data?.success === false){
-        Swal.fire({
-          title: "取得產品失敗",
-          icon: "error"
-        })
-      }
-    } 
-  };
-
-  // 打開 Modal
-  const openModal = async (productId) => {
-    setLoadingProductId(productId);
-
-    productModalRef.current = new bootstrap.Modal("#productModal", {
-      keyboard: false,
-    });
-    if(productId){
-      getProduct(productId);
-      productModalRef.current.show();
-      setLoadingProductId(null);
-    }
-    
-  }
-
-  // 關閉 Modal
-  const closeModal = () => {
-    productModalRef.current.hide();
-  }
-
   // 加入購物車
   const addCart = async (id, num) => {
     setLoadingCartId(id);
@@ -112,33 +73,22 @@ const ProductPage = ({ getCart, cart }) => {
   };
 
   return (
-            <div className="container py-5">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>產品列表</h2>
-                <Link to="/cart" className="btn btn-outline-primary">
-                  查看購物車 ({cart?.carts?.length})
-                </Link>
-              </div>
-
-              <ProductList 
-                products={products}
-                openModal={openModal}
-                addCart={addCart}
-                loadingProductId={loadingProductId}
-                loadingCartId={loadingCartId}
-              />
-            
-              <Pagination
-                pagination={pagination}
-                onPageChange={getProducts}
-              />
-
-              <ProductModal
-                product={selectedProduct} 
-                addCart={addCart}
-                onCloseModal={closeModal}
-              />
-            </div>
+    <div className="container py-5">
+      <Navbar cartCount={cart?.carts?.length} />
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>產品列表</h2>
+      </div>
+      <ProductList 
+        products={products}
+        addCart={addCart}
+        loadingProductId={loadingProductId}
+        loadingCartId={loadingCartId}
+      />
+      <Pagination
+        pagination={pagination}
+        onPageChange={getProducts}
+      />
+    </div>
   );
 }
 

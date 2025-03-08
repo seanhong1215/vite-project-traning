@@ -3,6 +3,8 @@ import FrontendLayout from '../layouts/FrontendLayout';
 import CheckoutPage from '../pages/CheckoutPage';
 import CartPage from '../pages/CartPage';
 import ProductPage from '../pages/Product';
+import ProductPageDetail from '../pages/ProductPageDetail';
+import NotFound from "../pages/NotFound";
 
 const createRouter = (deleteCartAll, deleteCart, updateCart, getCart, cart) => {
     return createHashRouter([
@@ -13,6 +15,10 @@ const createRouter = (deleteCartAll, deleteCart, updateCart, getCart, cart) => {
           {
             index: true, //設定首頁
             element: <ProductPage getCart={getCart} cart={cart} />,
+          },
+          {
+            path: 'product/:id', 
+            element: <ProductPageDetail getCart={getCart} cart={cart} />,
           },
           {
             path: 'checkout',
@@ -28,6 +34,10 @@ const createRouter = (deleteCartAll, deleteCart, updateCart, getCart, cart) => {
                 updateCart={updateCart}
               />
             ),
+          },
+          {
+            path: '*',
+            element: <NotFound />,
           },
         ],
       },

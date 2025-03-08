@@ -2,21 +2,22 @@ import PropTypes from 'prop-types';
 import ReactLoading from "react-loading";
 import { currency } from "../utils/filter";
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../api/api';
 
+function ProductList({ products, addCart, loadingProductId, loadingCartId }) {
+  const navigate = useNavigate();
 
-function ProductList({
-  products, openModal, addCart, loadingProductId, loadingCartId
-}) {
-  const handleAddToCart = async (productId, qty) => {
-    await addCart(productId, qty);
-    if(productId){
-       Swal.fire({
-        title: "加入購物車成功",
-        icon: "success"
-      })
+  const handleViewDetails = async(productId) => {
+    try {
+      const res = await api.getProduct(productId);
+      navigate(`/product/${productId}`, { state: { product: res.data.product } });
+    } catch (error) {
+      Swal.fire({ title: `取得產品失敗 + ${error}`, icon: "error" });
     }
+
   };
-    
+
   return (
     <table className="table align-middle">
       <thead>
@@ -31,14 +32,14 @@ function ProductList({
         {products.map((product) => (
           <tr key={product.id}>
              <td style={{ width: "200px" }}>
-                            <div
-                              style={{
-                                height: "100px",
-                                backgroundSize: "cover",
-                                backgroundPosition: "center",
-                                backgroundImage: `url(${product.imageUrl})`,
-                              }}
-                            />
+                <div
+                  style={{
+                    height: "100px",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundImage: `url(${product.imageUrl})`,
+                  }}
+                />
             </td>
             <td>{product.title}</td>
             <td>
@@ -51,7 +52,7 @@ function ProductList({
               <div className="btn-group btn-group-sm">
                 <button
                   className="btn btn-outline-secondary"
-                  onClick={() => openModal(product.id)}
+                  onClick={() => handleViewDetails(product.id)}
                   disabled={loadingProductId === product.id}
                 >
                   {loadingProductId === product.id ? (
@@ -68,7 +69,7 @@ function ProductList({
                 <button
                   type="button"
                   className="btn btn-outline-danger"
-                  onClick={() => handleAddToCart(product.id, 1)}
+                  onClick={() => addCart(product.id, 1)}
                   disabled={loadingCartId === product.id}
                 >
                   {loadingCartId === product.id ? (
@@ -102,7 +103,6 @@ ProductList.propTypes = {
       price: PropTypes.number.isRequired
     })
   ).isRequired,
-  openModal: PropTypes.func.isRequired,
   addCart: PropTypes.func.isRequired,
   loadingProductId: PropTypes.string,
   loadingCartId: PropTypes.string

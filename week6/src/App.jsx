@@ -44,7 +44,7 @@ const App = () => {
             icon: "error",
           });
         }
-      });
+    });
   };
 
   // 更新商品數量
@@ -94,7 +94,7 @@ const App = () => {
             icon: "error",
           });
         }
-      });
+      })
   };
 
   return ( 
