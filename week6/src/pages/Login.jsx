@@ -42,7 +42,7 @@ const LoginPage = () => {
     e.preventDefault();
     await admin.login(formData);
     setisAuthLogin(true);
-    navigate("/product");
+    navigate("/");
   }
 
   if (isLoading) {
