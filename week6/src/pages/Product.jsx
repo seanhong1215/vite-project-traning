@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import ProductList from '../component/ProductList';
 import Pagination from '../component/Pagination';
 import Swal from 'sweetalert2';
 import { api } from '../api/api';
+// import { admin } from '../api/admin';
 import PropTypes from 'prop-types';
-import Navbar from '../component/Navbar';
 
-const ProductPage = ({ getCart, cart }) => {
+const ProductPage = ({ getCart }) => {
 
   // 設定初始產品資料
   const [products, setProducts] = useState([]);
@@ -22,8 +22,6 @@ const ProductPage = ({ getCart, cart }) => {
     total_pages: 5
   });
 
-  // 操作 Modal DOM 元素
-  const productModalRef = useRef(null);
 
   useEffect(() => {
     getProducts();
@@ -57,7 +55,6 @@ const ProductPage = ({ getCart, cart }) => {
       try {
         getCart();
         setLoadingCartId(null);
-        productModalRef.current.hide();
         Swal.fire({
           title: "加入購物車成功",
           icon: "success"
@@ -74,7 +71,7 @@ const ProductPage = ({ getCart, cart }) => {
 
   return (
     <div className="container py-5">
-      <Navbar cartCount={cart?.carts?.length} />
+      {/* <Navbar cartCount={cart?.carts?.length} /> */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>產品列表</h2>
       </div>

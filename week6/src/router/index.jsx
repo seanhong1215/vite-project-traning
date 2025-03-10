@@ -5,12 +5,13 @@ import CartPage from '../pages/CartPage';
 import ProductPage from '../pages/Product';
 import ProductPageDetail from '../pages/ProductPageDetail';
 import NotFound from "../pages/NotFound";
+import Login from "../pages/Login";
 
 const createRouter = (deleteCartAll, deleteCart, updateCart, getCart, cart) => {
     return createHashRouter([
       {
         path: '/',
-        element: <FrontendLayout />,
+        element: <FrontendLayout cart={cart} />,
         children: [
           {
             index: true, //設定首頁
@@ -40,6 +41,10 @@ const createRouter = (deleteCartAll, deleteCart, updateCart, getCart, cart) => {
             element: <NotFound />,
           },
         ],
+      },
+      {
+        path: '/login',  
+        element: <Login />,
       },
     ]);
   };

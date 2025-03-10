@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/api';
 
 function ProductList({ products, addCart, loadingProductId, loadingCartId }) {
+
   const navigate = useNavigate();
 
   const handleViewDetails = async(productId) => {
@@ -13,9 +14,11 @@ function ProductList({ products, addCart, loadingProductId, loadingCartId }) {
       const res = await api.getProduct(productId);
       navigate(`/product/${productId}`, { state: { product: res.data.product } });
     } catch (error) {
-      Swal.fire({ title: `取得產品失敗 + ${error}`, icon: "error" });
+      Swal.fire({  
+        title: "取得產品失敗",
+        text: error.message || "請稍後再試",
+        icon: "error", });
     }
-
   };
 
   return (
@@ -56,12 +59,15 @@ function ProductList({ products, addCart, loadingProductId, loadingCartId }) {
                   disabled={loadingProductId === product.id}
                 >
                   {loadingProductId === product.id ? (
-                    <ReactLoading
-                      type="spin"
-                      color="#6c757d"
-                      height={20}
-                      width={20}
-                    />
+                    <>
+                      <ReactLoading
+                        type="spin"
+                        color="#6c757d"
+                        height={20}
+                        width={20}
+                      />
+                      <span className="ms-1">Loading...</span>
+                    </>
                   ) : (
                     "查看更多"
                   )}
@@ -104,8 +110,8 @@ ProductList.propTypes = {
     })
   ).isRequired,
   addCart: PropTypes.func.isRequired,
-  loadingProductId: PropTypes.string,
-  loadingCartId: PropTypes.string
+  loadingProductId: PropTypes.number,
+  loadingCartId: PropTypes.number
 };
 
 export default ProductList;

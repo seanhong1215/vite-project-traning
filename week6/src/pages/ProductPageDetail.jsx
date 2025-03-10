@@ -58,12 +58,6 @@ function ProductDetail({ cart, getCart }) {
           >
             返回商品列表
           </button>
-          <button 
-            className="btn btn-outline-primary"
-            onClick={() => navigate('/cart')}
-          >
-            查看購物車 ({cart?.carts?.length})
-          </button>
         </div>
       </div>
       <div className="product-card">

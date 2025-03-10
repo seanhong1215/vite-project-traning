@@ -24,21 +24,28 @@ export const admin = {
         /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
         "$1"
       );
-      axios.defaults.headers.common.Authorization = token;
+  
       if (!token) {
-        return
-      } else {
-        const response = await api.checkAdmin();
-        return response.data.success;
+        localStorage.removeItem("isAuthLogin");
+        return false; 
       }
-      
+  
+      const response = await axios.get("/api/checkAdmin", {
+        headers: { Authorization: token }
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem("isAuthLogin", "true");
+        return true;
+      } else {
+        localStorage.removeItem("isAuthLogin");
+        return false;
+      }
     } catch (error) {
-        if(error.response?.data?.success === false){
-          Swal.fire({
-            title: "驗證失敗，請重新登入",
-            icon: "error"
-          })
-        }
+      console.log(error)
+      localStorage.removeItem("isAuthLogin");
+      return false;
     }
   },
+  
 }; 

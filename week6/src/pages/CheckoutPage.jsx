@@ -16,10 +16,11 @@ const CheckoutPage = ({getCart}) => {
   const onSubmit = async (data) => {
     const validationErrors = validateForm(data);
         if (Object.keys(validationErrors).length === 0) {
-          await api.order(data);
+          const res = await api.order(data);
           try{
               Swal.fire({
                 title: "送出訂單資料成功",
+                text: `你的訂單編號為: ${res.data.orderId}`,
                 icon: "success"
               }).then((result) => {
                 if (result.isConfirmed) {
