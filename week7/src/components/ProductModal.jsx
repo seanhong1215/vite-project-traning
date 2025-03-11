@@ -3,7 +3,8 @@ import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import * as bootstrap from 'bootstrap';
 import { admin } from '../api/admin';
-import Swal from 'sweetalert2';
+import { pushMessage } from "../redux/toastSlice";
+import { useDispatch } from "react-redux";
 
 function ProductModal({
   mode,
@@ -14,6 +15,8 @@ function ProductModal({
   onupdateProductData,
   ondelProductData,
 }) {
+
+  const dispatch = useDispatch();
 
   // 操作 Modal DOM 元素
   const productModalRef = useRef(null);
@@ -42,10 +45,12 @@ function ProductModal({
       })
       .catch((error) => {
         if(error.response?.data?.success === false){
-          Swal.fire({
-            title: "上傳圖片失敗",
-            icon: "error"
-          })
+          dispatch(
+            pushMessage({
+              text: "上傳圖片失敗",
+              status: "error",
+            })
+          );
         }
       });
   }

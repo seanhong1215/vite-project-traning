@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Toast as BsToast } from "bootstrap";
 import { removeMessage } from "../redux/toastSlice";
 
-const TOAST_DURATION = 2000;
+const TOAST_DURATION = 3000;
 
 export default function Toast() {
   const messages = useSelector((state) => state.toast.messages);
@@ -27,7 +27,9 @@ export default function Toast() {
     });
   }, [messages]);
 
+  // eslint-disable-next-line no-unused-vars
   const handleDismiss = (message_id) => {
+    // eslint-disable-next-line no-undef
     dispatch(removeMessage(message.id));
   };
 
@@ -57,7 +59,7 @@ export default function Toast() {
               aria-label="Close"
             ></button>
           </div>
-          <div className="toast-body">{message.text}</div>
+          <div className="toast-body text-start">{message.text}</div>
         </div>
       ))}
     </div>

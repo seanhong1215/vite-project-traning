@@ -3,7 +3,8 @@ import { RouterProvider } from "react-router-dom";
 import { CartProvider, useCart  } from "./contexts/CartContext";
 import { createHashRouter, Navigate } from "react-router-dom";
 import ProductPage from "./pages/ProductPage";
-import ProductPageDetail from "./pages/ProductPageDetail";
+import ProductPageList from "./pages/ProductPageList";
+import ProductPageListDetail from "./pages/ProductPageDetail";
 import CheckoutPage from "./pages/CheckoutPage";
 import CartPage from "./pages/CartPage";
 import Login from "./pages/LoginPage";
@@ -46,8 +47,15 @@ const RouterWrapper = () => {
           path: "/product",
           element: <Layout cart={cart} isLogin={isLogin} />,
           children: [
-            { index: true, element: <ProductPage cart={cart} /> },
-            { path: ":id", element: <ProductPageDetail cart={cart} getCart={getCart} /> },
+            { index: true, element: <ProductPage /> },
+          ],
+        },
+        {
+          path: "/product-list",
+          element: <Layout cart={cart} isLogin={isLogin} />,
+          children: [
+            { index: true, element: <ProductPageList getCart={getCart} /> },
+            { path: ":id", element: <ProductPageListDetail cart={cart} getCart={getCart} /> },
           ],
         },
         {

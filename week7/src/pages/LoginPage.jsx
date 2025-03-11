@@ -2,10 +2,11 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { admin } from '../api/admin';
+import { pushMessage } from "../redux/toastSlice";
+import { useDispatch } from "react-redux";
 
 function LoginPage({ setIsLogin }) {
-  // api載入 loading..
-  // const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
   // 存放登入時的帳號與密碼
@@ -30,10 +31,15 @@ function LoginPage({ setIsLogin }) {
     try {
       await admin.login(account);
       setIsLogin(true);
+      dispatch(
+        pushMessage({
+          text: "登入成功",
+          status: "success",
+        })
+      );
       navigate("/product"); // 登入後跳轉到 product 頁面
     } catch (error) {
       console.log(error);
-      alert("登入失敗");
     }
   };
 

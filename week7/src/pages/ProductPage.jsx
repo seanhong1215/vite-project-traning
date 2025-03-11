@@ -8,7 +8,8 @@ import Toast from "../components/Toast";
 import ReactLoading from "react-loading";
 import { admin } from '../api/admin';
 import axios from 'axios';
-import Swal from 'sweetalert2';
+import { pushMessage } from "../redux/toastSlice";
+import { useDispatch } from "react-redux";
 
 // 管理產品表單的初始狀態
 const initProduct = {
@@ -26,6 +27,9 @@ const initProduct = {
 };
 
 function ProductPage() {
+
+    const dispatch = useDispatch();
+
     // 設定錯誤訊息
     // eslint-disable-next-line no-unused-vars
     const [error, setError] = useState(null);
@@ -100,18 +104,22 @@ function ProductPage() {
         closeModal();
         getProducts();
         if(response?.data?.success === true){
-          Swal.fire({
-            title: "新增產品成功",
-            icon: "success"
-          })
+          dispatch(
+            pushMessage({
+              text: "新增產品成功",
+              status: "success",
+            })
+          );
         }
       })
       .catch((error) => {
         if(error.response?.data?.success === false){
-          Swal.fire({
-            title: "新增產品失敗",
-            icon: "error"
-          })
+          dispatch(
+            pushMessage({
+              text: "新增產品失敗",
+              status: "error",
+            })
+          );
         }
       });
   }
@@ -134,18 +142,22 @@ function ProductPage() {
         closeModal();
         getProducts();
         if(response?.data?.success === true){
-          Swal.fire({
-            title: "更新產品成功",
-            icon: "success"
-          })
+          dispatch(
+            pushMessage({
+              text: "更新產品成功",
+              status: "success",
+            })
+          );
         }
       })
       .catch((error) => {
         if(error.response?.data?.success === false){
-          Swal.fire({
-            title: "更新產品失敗",
-            icon: "error"
-          })
+          dispatch(
+            pushMessage({
+              text: "更新產品失敗",
+              status: "error",
+            })
+          );
         }
       });
   }
@@ -158,18 +170,22 @@ function ProductPage() {
         closeModal();
         getProducts();
         if(response?.data?.success === true){
-          Swal.fire({
-            title: "刪除產品成功",
-            icon: "success"
-          })
+          dispatch(
+            pushMessage({
+              text: "刪除產品成功",
+              status: "success",
+            })
+          );
         }
       })
       .catch((error) => {
         if(error.response?.data?.success === false){
-          Swal.fire({
-            title: "刪除產品失敗",
-            icon: "error"
-          })
+          dispatch(
+            pushMessage({
+              text: "刪除產品失敗",
+              status: "error",
+            })
+          );
         }
       });
   }

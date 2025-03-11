@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/api';
 import "../assets/style.css"; 
-import Swal from 'sweetalert2';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useDispatch } from "react-redux";
+import { pushMessage } from "../redux/toastSlice.js";
 
 function ProductDetail({ getCart }) {
+  
   const [cartQuantity, setCartQuantity] = useState(1);
   const { id } = useParams();
   const location = useLocation();
   const [product, setProduct] = useState(location.state?.product || null);
-
-  const navigate = useNavigate();
+  
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!product) {
@@ -29,16 +31,20 @@ function ProductDetail({ getCart }) {
     await api.addCart(data);
       try {
         getCart();
-        Swal.fire({
-          title: "加入購物車成功",
-          icon: "success"
-        })
+        dispatch(
+          pushMessage({
+            text: "加入購物車成功",
+            status: "success",
+          })
+        );
       } catch (error) {
         if(error.response?.data?.success === false){
-          Swal.fire({
-            title: "加入購物車失敗",
-            icon: "error"
-          })
+          dispatch(
+            pushMessage({
+              text: "加入購物車失敗",
+              status: "error",
+            })
+          );
         }
       }
   };
@@ -51,14 +57,6 @@ function ProductDetail({ getCart }) {
     <div className="container py-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>產品詳細資料</h2>
-        <div className="d-flex gap-2">
-        <button 
-            className="btn btn-outline-primary"
-            onClick={() => navigate('/')}
-          >
-            返回商品列表
-          </button>
-        </div>
       </div>
       <div className="product-card">
         {/* 左側圖片 */}
