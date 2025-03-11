@@ -1,11 +1,13 @@
-import axios from "axios";
 import { useState } from "react";
 import PropTypes from "prop-types";
-
-// 環境變數
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+import { useNavigate } from "react-router-dom";
+import { admin } from '../api/admin';
 
 function LoginPage({ setIsLogin }) {
+  // api載入 loading..
+  // const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
   // 存放登入時的帳號與密碼
   const [account, setAccount] = useState({
     username: "benny@gmail.com",
@@ -15,31 +17,27 @@ function LoginPage({ setIsLogin }) {
   // 處理帳號輸入
   // 更新 account 狀態，讓使用者輸入帳號密碼時即時更新
   const handleInputChange = (e) => {
-    const { value, name } = e.target;
-
-    setAccount({
-      ...account,
-      [name]: value,
-    });
+    const { id, value } = e.target;
+    setAccount((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
   };
 
   // 登入功能
-  // 發送登入請求，成功後將 token 存入 cookie，並設置全域的 Authorization 標頭，然後獲取產品列表。
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${BASE_URL}/admin/signin`, account);
-      const { token, expired } = res.data;
-
-      document.cookie = `hexToken=${token}; expires=${new Date(expired)}`;
-      axios.defaults.headers.common["Authorization"] = token;
-
-      await setIsLogin(true);
+      await admin.login(account);
+      setIsLogin(true);
+      navigate("/product"); // 登入後跳轉到 product 頁面
     } catch (error) {
       console.log(error);
       alert("登入失敗");
     }
   };
+
+
 
   return (
     <div className="d-flex flex-column justify-content-center align-items-center vh-100">

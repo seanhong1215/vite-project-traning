@@ -1,49 +1,61 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-// import Pagination from "../components/Pagination";
-// import ProductModal from "../components/ProductModal";
-// import DelProductModal from "../components/ProductModalDel";
-// import Toast from "../components/Toast";
+
+import { useEffect, useState, useRef } from "react";
+import ProductList from '../components/ProductList'
+import Pagination from "../components/Pagination";
+import ProductModal from "../components/ProductModal";
+import * as bootstrap from 'bootstrap';
+import Toast from "../components/Toast";
 import ReactLoading from "react-loading";
-import PropTypes from "prop-types";
+import { admin } from '../api/admin';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
-// 環境變數
-const BASE_URL = import.meta.env.VITE_BASE_URL;
-const API_PATH = import.meta.env.VITE_API_PATH;
-
-// Modal 初始狀態
-const defaultModalState = {
-  imageUrl: "",
+// 管理產品表單的初始狀態
+const initProduct = {
+  id: "",
   title: "",
   category: "",
   unit: "",
-  origin_price: "",
-  price: "",
+  originPrice: 0,
+  price: 0,
   description: "",
   content: "",
-  is_enabled: 0,
-  imagesUrl: [""],
+  isEnabled: false,
+  imageUrl: "",
+  imagesUrl: [],
 };
 
-function ProductPage({ setIsLogin }) {
+function ProductPage() {
     // 設定錯誤訊息
+    // eslint-disable-next-line no-unused-vars
     const [error, setError] = useState(null);
-  // 存放產品列表的狀態
-  const [productList, setProductList] = useState([]);
 
-  // 螢幕 loading
-  const [isScreenLoading, setIsScreenLoading] = useState(false);
+    // 設定初始產品資料
+    const [products, setProducts] = useState([]);
+
+    // 設定分頁資料
+    const [pagination, setPagination] = useState({});
+    
+    // 設定 Modal 資料
+    const [modalMode, setModalMode] = useState(null);
+    
+    // 帶入 Modal 資料 => 存放當前的產品資料
+    const [formData, setFormData] = useState(initProduct);
+   
+     // 操作 Modal DOM 元素
+    const productModalRef = useRef(null);
+
+    // 螢幕 loading
+    const [isScreenLoading, setIsScreenLoading] = useState(false);
+
 
   // 獲取產品列表
-  // 向後端 API 取得產品列表，並更新 productList
   const getProducts = async (page = 1) => {
     try {
       setIsScreenLoading(true);
-      const res = await axios.get(
-        `${BASE_URL}/api/${API_PATH}/admin/products?page=${page}`
-      );
-      setProductList(res.data.products);
-      setPageInfo(res.data.pagination);
+      const res = await admin.getProductData(page);
+      setProducts(res.data.products);
+      setPagination(res.data.pagination);
     } catch (error) {
       console.error(error);
     } finally {
@@ -51,195 +63,177 @@ function ProductPage({ setIsLogin }) {
     }
   };
 
-  // 檢查登入狀態
-  // 驗證使用者是否已登入，如果登入成功，則載入產品列表。
-  const checkIsLogin = async () => {
-    setError(null);
-    try {
-      const token = document.cookie.split("; ").find((row) => row.startsWith("hexToken="))?.split("=")[1];
-      axios.defaults.headers.common.Authorization = token;
-      const res = await axios.post(`${BASE_URL}/api/user/check`);
-      if(res.data.success === true){
-        // 根據登入狀態設置顏色
-        // setButtonClass(token ? 'btn-success' : 'btn-danger');
-        alert("登入成功");
-      }
-    } catch (error) {
-      setError('登入檢查失敗:', error);
-      // setButtonClass('btn-danger');
-    }
-  };
 
   // 初始掛載時檢查登入
-  // 當元件掛載時，從 cookie 取得 token，設置 Authorization，並檢查是否已登入。
   useEffect(() => {
-    const token = document.cookie.replace(
-      /(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    );
+    const init = async () => {
+      const token = localStorage.getItem("authToken"); // 從 localStorage 取得 token
+      if (token) {
+        axios.defaults.headers.common["Authorization"] = token;
+        getProducts();
+      }
+    };
+    init();
 
-    axios.defaults.headers.common["Authorization"] = token;
-
-    checkIsLogin();
+    // 初始化 Modal
+    productModalRef.current = new bootstrap.Modal('#productModal', {
+      keyboard: false,
+    });
   }, []);
 
-  //  ——————— 加入產品 Modal ———————
 
-  // 記錄當前 Modal 是 "create" 還是 "edit"
-  const [modalMode, setmodalMode] = useState(null);
+// 新增產品
+  const createProductData = async () => {
+    const productData = {
+      data: {
+        ...formData, // 複製 formData 內的所有屬性
+        origin_price: Number(formData.originPrice),
+        price: Number(formData.price),
+        is_enabled: formData.isEnabled ? 1 : 0,
+        imagesUrl: formData.imagesUrl,
+      },
+    };
 
-  // 產品 Modal 狀態是開或關
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+    await admin
+      .createProductData(productData)
+      .then((response) => {
+        closeModal();
+        getProducts();
+        if(response?.data?.success === true){
+          Swal.fire({
+            title: "新增產品成功",
+            icon: "success"
+          })
+        }
+      })
+      .catch((error) => {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "新增產品失敗",
+            icon: "error"
+          })
+        }
+      });
+  }
 
-  // 刪除產品 Modal 狀態是開或關
-  const [isDelProductModalOpen, setIsDelProductModalOpen] = useState(false);
+  // 更新產品
+  const updateProductData = async (product) => {
+    const productData = {
+      data: {
+        ...product,
+        origin_price: Number(product.originPrice),
+        price: Number(product.price),
+        is_enabled: product.isEnabled ? 1 : 0,
+        imagesUrl: product.imagesUrl,
+      },
+    };
 
-  // 打開產品 Modal
-  const handleOpenProductModal = (mode, product) => {
-    setmodalMode(mode);
+    await admin
+      .updateProductData(productData)
+      .then((response) => {
+        closeModal();
+        getProducts();
+        if(response?.data?.success === true){
+          Swal.fire({
+            title: "更新產品成功",
+            icon: "success"
+          })
+        }
+      })
+      .catch((error) => {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "更新產品失敗",
+            icon: "error"
+          })
+        }
+      });
+  }
 
-    switch (mode) {
-      // mode === "create" 時，設置空白的產品表單
-      case "create":
-        setTempProduct(defaultModalState);
-        break;
+  // 刪除產品
+  const delProductData = async (product) => {
+    await admin
+      .delProductData(product.id)
+      .then((response) => {
+        closeModal();
+        getProducts();
+        if(response?.data?.success === true){
+          Swal.fire({
+            title: "刪除產品成功",
+            icon: "success"
+          })
+        }
+      })
+      .catch((error) => {
+        if(error.response?.data?.success === false){
+          Swal.fire({
+            title: "刪除產品失敗",
+            icon: "error"
+          })
+        }
+      });
+  }
 
-      // mode === "edit" 時，載入選中的產品資料
-      case "edit":
-        setTempProduct(product);
-        break;
+  // 打開 Modal
+  const openModal = (mode, product) => {
+    setModalMode(mode);
+    setFormData({
+      ...product,
+      originPrice: product.origin_price || 0,
+      isEnabled: product.is_enabled === 1,
+      imagesUrl: product.imagesUrl || [],
+    });
+    productModalRef.current.show();
+  }
 
-      default:
-        break;
-    }
-
-    setIsProductModalOpen(true);
-  };
-
-  // 打開刪除產品 Modal
-  const handleOpenDelProductModal = (product) => {
-    setTempProduct(product);
-
-    setIsDelProductModalOpen(true);
-  };
-
-  const [tempProduct, setTempProduct] = useState(defaultModalState);
-
-  // 分頁狀態
-  const [pageInfo, setPageInfo] = useState({});
-
-  // 換頁功能
-  const handlePageChange = (page) => {
-    getProducts(page);
-  };
-
-  // 登出功能
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${BASE_URL}/logout`);
-      setIsLogin(false);
-    } catch (error) {
-      console.log(error);
-      alert("登出失敗");
-    }
-  };
+  // 關閉 Modal
+  const closeModal = () => {
+    productModalRef.current.hide();
+  }
 
   return (
     <>
       <div className="container mt-5">
-        <div className="row mb-4">
-          <div className="justify-content-end">
-            <button
-              onClick={handleLogout}
-              type="button"
-              className="btn btn-secondary"
-            >
-              登出
-            </button>
-          </div>
-        </div>
-
         <div className="row">
           <div className="col">
             <div className="d-flex justify-content-between">
               <h2 className="fw-bold">產品列表</h2>
               <button
-                onClick={() => handleOpenProductModal("create")}
+                onClick={() => openModal('create', initProduct)}
                 type="button"
                 className="btn btn-primary"
               >
-                建立新的產品
+                建立產品
               </button>
             </div>
-            <table className="table table-hover align-middle">
-              <thead>
-                <tr>
-                  <th scope="col">產品名稱</th>
-                  <th scope="col">原價</th>
-                  <th scope="col">售價</th>
-                  <th scope="col">是否啟用</th>
-                  <th scope="col">編輯 / 刪除</th>
-                </tr>
-              </thead>
-              <tbody>
-                {productList.map((product) => (
-                  <tr key={product.id}>
-                    <th scope="row">{product.title}</th>
-                    <td>{product.origin_price}</td>
-                    <td>{product.price}</td>
-                    <td>
-                      {product.is_enabled ? (
-                        <span className="text-success">啟用</span>
-                      ) : (
-                        <span>未啟用</span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="btn-group">
-                        <button
-                          onClick={() =>
-                            handleOpenProductModal("edit", product)
-                          }
-                          type="button"
-                          className="btn btn-outline-primary btn-sm me-2"
-                        >
-                          編輯
-                        </button>
-                        <button
-                          onClick={() => handleOpenDelProductModal(product)}
-                          type="button"
-                          className="btn btn-outline-danger btn-sm"
-                        >
-                          刪除
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="mt-4">
+              <ProductList
+                products={products}
+                onEditProduct={openModal}
+              />
+            </div>
+            <Pagination
+              pagination={pagination}
+              onPageChange={getProducts}
+            />
+            
           </div>
         </div>
 
-        {/* <Pagination pageInfo={pageInfo} handlePageChange={handlePageChange} /> */}
       </div>
 
-      {/* <ProductModal
-        modalMode={modalMode}
-        tempProduct={tempProduct}
-        isOpen={isProductModalOpen}
-        setIsOpen={setIsProductModalOpen}
-        getProducts={getProducts}
-      /> */}
+       <ProductModal
+        mode={modalMode}
+        product={formData}
+        onCloseModal={closeModal}
+        onEditProduct={setFormData}
+        oncreateProductData={createProductData}
+        onupdateProductData={updateProductData}
+        ondelProductData={delProductData}
+      />
 
-      {/* <DelProductModal
-        tempProduct={tempProduct}
-        isOpen={isDelProductModalOpen}
-        setIsOpen={setIsDelProductModalOpen}
-        getProducts={getProducts}
-      /> */}
 
-      {/* <Toast /> */}
+      <Toast />
 
       {isScreenLoading && (
         <div
@@ -258,9 +252,5 @@ function ProductPage({ setIsLogin }) {
   );
 }
 
-
-ProductPage.propTypes = {
-  setIsLogin: PropTypes.func.isRequired,
-};
 
 export default ProductPage;
